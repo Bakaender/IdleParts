@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-    
-namespace Bakaender
+using System;
+
+namespace EndlessWaveTD
 {
     public enum NumberFormatting
     {
@@ -11,13 +9,13 @@ namespace Bakaender
     }
 
     [Serializable]
-    public class BigDouble
+    public class BigDouble : IEquatable<BigDouble>
     {
         public static int DigitsToTrack = 10;
         public static int NumDigitsToDisplay = 4;
         public static int ShowScientificAfterExponent = 6;
         public static NumberFormatting numberFormatting;
-  
+
         public double Number;
         public int Exponent;
 
@@ -46,7 +44,7 @@ namespace Bakaender
         }
 
         public BigDouble(double number, int exponent)
-        {
+        {        
             Number = number;
             Exponent = exponent;
 
@@ -68,7 +66,7 @@ namespace Bakaender
             {
                 Number /= 10;
                 Exponent++;
-            }
+            }         
         }
 
         public override string ToString()
@@ -132,7 +130,7 @@ namespace Bakaender
                 }
                 else if (returnNum < 1000)
                 {
-                    return returnNum.ToString("#,###.#");
+                    return returnNum.ToString("#,###.#"); //Because 999.99 rounds up to 1000, having the comma keeps everything consistent.
                 }
 
                 return returnNum.ToString("#,###,###");
@@ -165,7 +163,7 @@ namespace Bakaender
 
                         result.Insert(0, ((char)(96 + First)).ToString());
 
-                        result += ((char)(96 + (N % 26) + 1)); 
+                        result += ((char)(96 + (N % 26) + 1));
                     }
                     else
                     {
@@ -181,7 +179,7 @@ namespace Bakaender
                     return BeforeScientific;
                 }
             }
-        }    
+        }
 
         public double Double
         {
@@ -215,6 +213,7 @@ namespace Bakaender
             return (float)result.Number;
         }
 
+        //Addition
         public static BigDouble operator +(BigDouble bigDouble1, BigDouble bigDouble2)
         {
             int shiftDigits = bigDouble1.Exponent - bigDouble2.Exponent;
@@ -239,7 +238,7 @@ namespace Bakaender
                     {
                         result.Number /= 10;
                         result.Exponent++;
-                    }       
+                    }
                 }
                 else
                 {
@@ -268,24 +267,11 @@ namespace Bakaender
             return shiftDigits > 0 ? bigDouble1 : bigDouble2;
         }
 
-        public static BigDouble operator +(BigDouble bigDouble1, float num2)
-        {
-            BigDouble result = new BigDouble(num2);
+        public static BigDouble operator +(BigDouble bigDouble1, float num2) => bigDouble1 + new BigDouble(num2);
 
-            result += bigDouble1;
+        public static BigDouble operator +(BigDouble bigDouble1, int num2) => bigDouble1 + new BigDouble(num2);
 
-            return result;
-        }
-
-        public static BigDouble operator +(BigDouble bigDouble1, int num2)
-        {
-            BigDouble result = new BigDouble(num2);
-
-            result += bigDouble1;
-
-            return result;
-        }
-
+        //Subtraction
         public static BigDouble operator -(BigDouble bigDouble1, BigDouble bigDouble2)
         {
             BigDouble result = new BigDouble();
@@ -350,24 +336,11 @@ namespace Bakaender
             }
         }
 
-        public static BigDouble operator -(BigDouble bigDouble1, float num2)
-        {
-            BigDouble result = new BigDouble(num2);
+        public static BigDouble operator -(BigDouble bigDouble1, float num2) => bigDouble1 - new BigDouble(num2);
 
-            result = bigDouble1 - result;
+        public static BigDouble operator -(BigDouble bigDouble1, int num2) => bigDouble1 - new BigDouble(num2);
 
-            return result;
-        }
-
-        public static BigDouble operator -(BigDouble bigDouble1, int num2)
-        {
-            BigDouble result = new BigDouble(num2);
-
-            result = bigDouble1 - result;
-
-            return result;
-        }
-
+        //Multiplication
         public static BigDouble operator *(BigDouble bigDouble1, BigDouble bigDouble2)
         {
             BigDouble result = new BigDouble(bigDouble1.Number * bigDouble2.Number, bigDouble1.Exponent + bigDouble2.Exponent);
@@ -387,24 +360,11 @@ namespace Bakaender
             return result;
         }
 
-        public static BigDouble operator *(BigDouble bigDouble1, float num2)
-        {
-            BigDouble result = new BigDouble(num2);
+        public static BigDouble operator *(BigDouble bigDouble1, float num2) => bigDouble1 * new BigDouble(num2);
 
-            result *= bigDouble1;
+        public static BigDouble operator *(BigDouble bigDouble1, int num2) => bigDouble1 * new BigDouble(num2);
 
-            return result;
-        }
-
-        public static BigDouble operator *(BigDouble bigDouble1, int num2)
-        {
-            BigDouble result = new BigDouble(num2);
-
-            result *= bigDouble1;
-
-            return result;
-        }
-
+        //Division
         public static BigDouble operator /(BigDouble bigDouble1, BigDouble bigDouble2)
         {
             BigDouble result = new BigDouble(bigDouble1.Number / bigDouble2.Number, bigDouble1.Exponent - bigDouble2.Exponent);
@@ -419,329 +379,79 @@ namespace Bakaender
             {
                 result.Number /= 10;
                 result.Exponent++;
-            }       
+            }
 
             return result;
         }
 
-        public static BigDouble operator /(BigDouble bigDouble1, float num2)
-        {
-            BigDouble result = new BigDouble(num2);
+        public static BigDouble operator /(BigDouble bigDouble1, float num2) => bigDouble1 / new BigDouble(num2);
 
-            result = bigDouble1 / result;
-
-            return result;
-        }
-
-        public static BigDouble operator /(BigDouble bigDouble1, int num2)
-        {
-            BigDouble result = new BigDouble(num2);
-
-            result = bigDouble1 / result;
-
-            return result;
-        }
+        public static BigDouble operator /(BigDouble bigDouble1, int num2) => bigDouble1 / new BigDouble(num2);
 
         #region Comparisons
 
-        #region BigDoubleComparisons
-        public static bool operator <(BigDouble bigDouble1, BigDouble bigDouble2)
-        {
-            if (bigDouble1.Exponent < bigDouble2.Exponent)
-            {
-                return true;
-            }
-            else if (bigDouble1.Exponent == bigDouble2.Exponent)
-            {
-                if (bigDouble1.Number < bigDouble2.Number)
-                {
-                    return true;
-                }
-            }
-            
-            return false;
-        }
+        //Equals & HashCode
+        public override bool Equals(object obj) => obj is BigDouble && Equals((BigDouble)obj);
 
-        public static bool operator >(BigDouble bigDouble1, BigDouble bigDouble2)
-        {
-            if (bigDouble1.Exponent > bigDouble2.Exponent)
-            {
-                return true;
-            }
-            else if (bigDouble1.Exponent == bigDouble2.Exponent)
-            {
-                if (bigDouble1.Number > bigDouble2.Number)
-                {
-                    return true;
-                }
-            }
+        public bool Equals(BigDouble other) => (Number, Exponent) == (other.Number, other.Exponent);
 
-            return false;
-        }
+        public override int GetHashCode() => (Number, Exponent).GetHashCode();
 
-        public static bool operator <=(BigDouble bigDouble1, BigDouble bigDouble2)
-        {
-            if (bigDouble1.Exponent < bigDouble2.Exponent)
-            {
-                return true;
-            }
-            else if (bigDouble1.Exponent == bigDouble2.Exponent)
-            {
-                if (bigDouble1.Number <= bigDouble2.Number)
-                {
-                    return true;
-                }
-            }
+        //BigDouble
+        public static bool operator ==(BigDouble double1, BigDouble double2) => double1.Equals(double2);
 
-            return false;
-        }
+        public static bool operator !=(BigDouble double1, BigDouble double2) => !(double1 == double2);
 
-        public static bool operator >=(BigDouble bigDouble1, BigDouble bigDouble2)
-        {
-            if (bigDouble1.Exponent > bigDouble2.Exponent)
-            {
-                return true;
-            }
-            else if (bigDouble1.Exponent == bigDouble2.Exponent)
-            {
-                if (bigDouble1.Number >= bigDouble2.Number)
-                {
-                    return true;
-                }
-            }
+        public static bool operator <(BigDouble bigDouble1, BigDouble bigDouble2) => bigDouble1.Exponent < bigDouble2.Exponent
+            || bigDouble1.Exponent == bigDouble2.Exponent && bigDouble1.Number < bigDouble2.Number;
 
-            return false;
-        }
+        public static bool operator >(BigDouble bigDouble1, BigDouble bigDouble2) => bigDouble1.Exponent > bigDouble2.Exponent
+            || bigDouble1.Exponent == bigDouble2.Exponent && bigDouble1.Number > bigDouble2.Number;
 
-        public static bool operator ==(BigDouble bigDouble1, BigDouble bigDouble2)
-        {
-            if (bigDouble1.Exponent == bigDouble2.Exponent)
-            {
-                if (bigDouble1.Number == bigDouble2.Number)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+        public static bool operator <=(BigDouble bigDouble1, BigDouble bigDouble2) => bigDouble1.Exponent < bigDouble2.Exponent
+            || bigDouble1.Exponent == bigDouble2.Exponent && bigDouble1.Number <= bigDouble2.Number;
 
-        public static bool operator !=(BigDouble bigDouble1, BigDouble bigDouble2)
-        {
-            if (bigDouble1.Exponent == bigDouble2.Exponent)
-            {
-                if (bigDouble1.Number == bigDouble2.Number)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
+        public static bool operator >=(BigDouble bigDouble1, BigDouble bigDouble2) => bigDouble1.Exponent > bigDouble2.Exponent
+            || bigDouble1.Exponent == bigDouble2.Exponent && bigDouble1.Number >= bigDouble2.Number;
 
-        public bool Equals(BigDouble other)
-        {
-            if (other == null)
-                return false;
+        //Int
+        public static bool operator <(BigDouble bigDouble1, int num2) => bigDouble1 < new BigDouble(num2);
 
-            if (this.Number == other.Number && this.Exponent == other.Exponent)
-                return true;
-            else
-                return false;
-        }
+        public static bool operator >(BigDouble bigDouble1, int num2) => bigDouble1 > new BigDouble(num2);
 
-        public override bool Equals(object obj)
-        {
-            if (obj == null)
-                return false;
+        public static bool operator <=(BigDouble bigDouble1, int num2) => bigDouble1 <= new BigDouble(num2);
 
-            BigDouble bigDoubleObj = obj as BigDouble;
-            if (bigDoubleObj == null)
-                return false;
-            else
-                return Equals(bigDoubleObj);
-        }
+        public static bool operator >=(BigDouble bigDouble1, int num2) => bigDouble1 >= new BigDouble(num2);
 
-        #endregion
+        public static bool operator ==(BigDouble bigDouble1, int num2) => bigDouble1 == new BigDouble(num2);
 
-        #region int Comparisons
+        public static bool operator !=(BigDouble bigDouble1, int num2) => bigDouble1 != new BigDouble(num2);
 
-        public static bool operator <(BigDouble bigDouble1, int num2)
-        {
-            if (bigDouble1 < new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
+        //Float
+        public static bool operator <(BigDouble bigDouble1, float num2) => bigDouble1 < new BigDouble(num2);
 
-        public static bool operator >(BigDouble bigDouble1, int num2)
-        {
-            if (bigDouble1 > new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
+        public static bool operator >(BigDouble bigDouble1, float num2) => bigDouble1 > new BigDouble(num2);
 
-        public static bool operator <=(BigDouble bigDouble1, int num2)
-        {
-            if (bigDouble1 <= new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
+        public static bool operator <=(BigDouble bigDouble1, float num2) => bigDouble1 <= new BigDouble(num2);
 
-        public static bool operator >=(BigDouble bigDouble1, int num2)
-        {
-            if (bigDouble1 >= new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
+        public static bool operator >=(BigDouble bigDouble1, float num2) => bigDouble1 >= new BigDouble(num2);
 
-        public static bool operator ==(BigDouble bigDouble1, int num2)
-        {
-            if (bigDouble1 == new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
+        public static bool operator ==(BigDouble bigDouble1, float num2) => bigDouble1 == new BigDouble(num2);
 
-        public static bool operator !=(BigDouble bigDouble1, int num2)
-        {
-            if (bigDouble1 != new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
+        public static bool operator !=(BigDouble bigDouble1, float num2) => bigDouble1 != new BigDouble(num2);
 
-        #endregion
+        //Double
+        public static bool operator <(BigDouble bigDouble1, double num2) => bigDouble1 < new BigDouble(num2);
 
-        #region float Comparisons
+        public static bool operator >(BigDouble bigDouble1, double num2) => bigDouble1 > new BigDouble(num2);
 
-        public static bool operator <(BigDouble bigDouble1, float num2)
-        {
-            if (bigDouble1 < new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static bool operator >(BigDouble bigDouble1, float num2)
-        {
-            if (bigDouble1 > new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static bool operator <=(BigDouble bigDouble1, float num2)
-        {
-            if (bigDouble1 <= new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static bool operator >=(BigDouble bigDouble1, float num2)
-        {
-            if (bigDouble1 >= new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static bool operator ==(BigDouble bigDouble1, float num2)
-        {
-            if (bigDouble1 == new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static bool operator !=(BigDouble bigDouble1, float num2)
-        {
-            if (bigDouble1 != new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        #endregion
-
-        #region double Comparisons
-
-        public static bool operator <(BigDouble bigDouble1, double num2)
-        {
-            if (bigDouble1 < new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static bool operator >(BigDouble bigDouble1, double num2)
-        {
-            if (bigDouble1 > new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static bool operator <=(BigDouble bigDouble1, double num2)
-        {
-            if (bigDouble1 <= new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static bool operator >=(BigDouble bigDouble1, double num2)
-        {
-            if (bigDouble1 >= new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static bool operator ==(BigDouble bigDouble1, double num2)
-        {
-            if (bigDouble1 == new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public static bool operator !=(BigDouble bigDouble1, double num2)
-        {
-            if (bigDouble1 != new BigDouble(num2))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        #endregion
-
-        public override int GetHashCode()
-        {
-            //who knows if works right.
-            return string.Format("{0}_{1}", Number, Exponent).GetHashCode();
-            //return base.GetHashCode();
-        }
+        public static bool operator <=(BigDouble bigDouble1, double num2) => bigDouble1 <= new BigDouble(num2);
+                                                             
+        public static bool operator >=(BigDouble bigDouble1, double num2) => bigDouble1 >= new BigDouble(num2);
+                                                             
+        public static bool operator ==(BigDouble bigDouble1, double num2) => bigDouble1 == new BigDouble(num2);
+                                                             
+        public static bool operator !=(BigDouble bigDouble1, double num2) => bigDouble1 != new BigDouble(num2);
 
         #endregion
     }
